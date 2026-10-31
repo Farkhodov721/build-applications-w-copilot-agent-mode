@@ -30,13 +30,13 @@ OctoFit Tracker is a three-tier application for a school fitness program. The st
 
 Record your plan here before editing code.
 
-- Presentation tier decision:
-- Logic tier decision:
-- Data tier decision:
-- Activity tracking approach:
-- Team management approach:
-- Leaderboard approach:
-- Workout suggestions approach:
+- Presentation tier decision: React 19 components fetch through the shared `getJson` client in `src/api/client.ts`, which resolves relative `/api/*` paths through the Vite dev proxy to the Express API on port 8000.
+- Logic tier decision: Express routes in `src/routes/api.ts` delegate validation and business logic to functions in `src/services/octofitService.ts`, returning deliberate 4xx responses for invalid or missing references instead of letting Mongoose cast errors surface as 500s.
+- Data tier decision: Mongoose schemas in `src/models` enforce `required` validation on business-critical fields, and `src/scripts/seed.ts` upserts demo fixtures idempotently without clearing unrelated application data.
+- Activity tracking approach: `POST /api/activities` validates `userId`/`teamId` as well-formed, existing Mongo ObjectIds before creating an `Activity` with computed `points` (equal to `minutes`) and a server-assigned `occurredAt` timestamp.
+- Team management approach: `POST /api/teams` requires `name` and `mascot`, accepts an optional initial `members` array, and `GET /api/teams` lists all teams with their member ids for the frontend to render.
+- Leaderboard approach: `GET /api/leaderboard` aggregates `Activity.points` grouped by `team`, sorts descending, and maps each team's total to a 1-based `rank` alongside its `teamName`.
+- Workout suggestions approach: `GET /api/workouts/suggestions/:userEmail` looks up the user by email (404 if not found), infers a focus area from their most recent activity type (falling back to their stored `fitnessGoal`), and returns matching `Workout` documents with a human-readable `reason`.
 
 ## Test plan
 
